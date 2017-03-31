@@ -302,17 +302,19 @@ apt-get install -y nginx
 rm /etc/nginx/sites-enabled/default
 cat > /etc/nginx/sites-available/webstrates << EOF
 server {
-    location / {
-        proxy_pass http://localhost:7007/;
-        proxy_set_header X-Forwarded-For \$remote_addr;
-    }
+    listen 80;
+    listen [::]:80;
 
-    location /ws/ {
-        proxy_pass http://localhost:7007/;
+    location / {
+        proxy_buffer_size 128k;
+        proxy_buffers 8 256k;
+        proxy_busy_buffers_size 256k;
+
+        proxy_pass http://127.0.0.1:7007/;
         proxy_http_version 1.1;
-        proxy_set_header Upgrade \$http_upgrade;
-        proxy_set_header Connection "upgrade";
-        proxy_set_header X-Forwarded-For \$remote_addr;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        client_max_body_size 102M;
     }
 }
 EOF
